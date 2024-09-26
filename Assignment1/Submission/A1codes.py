@@ -85,3 +85,50 @@ def minimizeLinf(X, y):
 
     # Return the optimized weights (w), which are the first d elements of the solution
     return np.array(solution['x'])[:d]
+
+
+
+
+##Q2   
+
+
+#a
+def linearRegL2Obj(w, X, y):
+
+    pred = X @ w
+    diff = pred = y
+    objectiveVal = (1/2) * np.mean(diff ** 2)
+    n = X.shape[0]
+    gradient = (X.T @ diff) / n
+
+    return objectiveVal, gradient
+
+#b
+def gd(func, w_init, X, y, step_size, max_iter, tol=1e-10):
+
+    w = w_init
+
+    for i in range(max_iter):
+        objval, gradient = func(w,X,y)
+        
+        norm = np.linalg.norm(gradient)
+        if norm < tol: #stop when gradient is good enough
+            break;
+
+        w = w - step_size * gradient
+
+    return w
+
+#Q2c
+def sigmoid(x):
+    return np.exp(-np.logaddexp(0, -x))
+
+
+def logisticRegObj(w, X, y):
+    pred = X @ w
+    n = X.shape[0]
+    
+    objval = (1/n) * np.sum(np.logaddexp(0, -pred) - y * pred)
+    grad = (1/n) * X.T @ (sigmoid(pred) - y)
+    
+    return objval, grad
