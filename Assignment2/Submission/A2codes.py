@@ -182,3 +182,25 @@ def adjHinge(X,y,lamb,kernel_func,stabilizer=1e-5):
     alpha0 = np.array(solution['x'][n])
 
     return alphas, alpha0
+
+
+
+
+##Testing 1b, 2b
+solvers.options['show_progress'] = False
+
+
+X = np.random.randn(100, 2)  # 100 samples, 2 features each
+y = np.random.choice([-1, 1], size=100)  # Binary labels
+lamb = 1.0  # Regularization parameter
+
+kernel_func = lambda X1, X2: np.dot(X1, X2.T)
+
+q1a, q1a0 = minHinge(X,y,lamb)
+q2a, q2a0 = adjHinge(X, y, lamb,kernel_func)
+
+print("Optimized weights Q1:", q2a.flatten())
+print("Optimized weights Q2:", q2a.flatten())
+
+print("Optimized bias Q1:", q1a0)
+print("Optimized bias Q2:", q2a0)
