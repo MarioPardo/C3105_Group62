@@ -43,49 +43,47 @@ def minBinDev(X, y, lamb):
 
 #b)
 
+#Mario Version
 def minHinge(X, y, lamb, stabilizer=1e-5):
-    n,d = X.shape
+    n, d = X.shape
 
-    #P in (P,q,G,h)
-    P = np.zeros((n+d+1,n+d+1))
+    # Define P matrix for the quadratic term
+    P = np.zeros((d + 1 + n, d + 1 + n))
+    P[:d, :d] = lamb * np.eye(d)  # Regularization on the weights
 
-    #for size of dimensioanlity, create that size identity matrix in the top left
-    P[:d, :d] = lamb * np.eye(d)
+    # Define q vector for the linear term
+    q = np.hstack([np.zeros(d + 1), np.ones(n)])
 
-    #q = d+1 zeroes, n 1's
-    q = np.hstack([np.zeros(d+1), np.ones(n)])
+    # Define G matrix for the constraints
+    G = np.zeros((2 * n, d + 1 + n))
+    G[:n, d+1:] = -np.eye(n)  # Constraints for non-negativity of slack variables
+    G[n:, :d] = np.diag(y) @ X
+    G[n:, d] = y
+    G[n:, d+1:] = -np.eye(n)  # Constraints for hinge loss
 
-    #G matrix: 2n rows for the slack variables for 2 constraints
-    G = np.zeros((2*n, d+1+n))
+    # Define h vector for the constraints
+    h = np.hstack([np.zeros(n), -np.ones(n)])
 
-    #first constraint, G11 (could be 0)
-    G[:n, :d] = -y[:, None] * X
+    # Add a stabilizer to ensure P is positive definite
+    P += stabilizer * np.eye(d + 1 + n)
 
-    #g12 for w0 (could also be 0)
-    G[:n,d]= -y
-
-    #g13, Iden matrix (prob good)
-    G[:n,d+1:]= -np.eye(n)
-
-    #second contraint 
-    G[n:, d+1:] = -np.eye(n)
-
-    #h, constraint for G, so 2n rows to match, 0n and -1n.
-    h = np.hstack([-np.ones(n), np.zeros(n)])
-
-    P += stabilizer * np.eye(d+1+n)
-
+    # Convert all to CVXOPT matrices
     P = matrix(P)
     q = matrix(q)
     G = matrix(G)
     h = matrix(h)
 
-    solution = solvers.qp(P,q,G,h)
+    # Suppress solver progress messages
+    solvers.options['show_progress'] = False
 
+    # Solve the quadratic programming problem
+    solution = solvers.qp(P, q, G, h)
+
+    # Extract weights and bias from the solution
     w = np.array(solution['x'][:d])
     w0 = np.array(solution['x'][d])
 
-    return w,w0
+    return w, w0
 
 #c
 
@@ -166,7 +164,7 @@ def adjHinge(X,y,lamb,kernel_func,stabilizer=1e-5):
     # Create the h vector
     h = np.hstack([np.zeros(n), -np.ones(n)])  # 0s for ξ ≥ 0 and 1s for the hinge constraint
 
-    # Convert everything to CVXOPT matrices for solving
+    # Convert 
     P = matrix(P)
     q = matrix(q)
     G = matrix(G)
@@ -194,6 +192,7 @@ X = np.random.randn(100, 2)  # 100 samples, 2 features each
 y = np.random.choice([-1, 1], size=100)  # Binary labels
 lamb = 1.0  # Regularization parameter
 
+#linear kernel
 kernel_func = lambda X1, X2: np.dot(X1, X2.T)
 
 q1a, q1a0 = minHinge(X,y,lamb)
