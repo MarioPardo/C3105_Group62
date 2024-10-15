@@ -115,67 +115,73 @@ def objective_function(params, y, lamb, K):
     alpha = params[:n]
     alpha0 = params[n]
     
-    linear_combination = K @ alpha + alpha0
-    loss = np.log(1 + np.exp(-y * linear_combination)).sum()
+    linear_combination = (K @ alpha) + alpha0
+    loss = np.sum(np.logaddexp(0, -y * linear_combination))
     
-    regularization = (lamb / 2) * np.dot(alpha.T, K @ alpha)
+    regularization = (lamb / 2) * alpha.T @ K @ alpha
     return loss + regularization
 
 
 def adjBinDev(X, y, lamb, kernel_func):
     n, d = X.shape
     K = kernel_func(X, X)
-    initial_params = np.zeros(n + 1)
+    initial_params = np.ones(n + 1)
     
     result = minimize(objective_function, initial_params, args=(y, lamb, K))
     
-    alpha = result.x[:-1]
-    alpha0 = result.x[-1]
+    a = result.x[:-1]
+    a0 = result.x[-1]
 
-    return alpha, alpha0
+    return a, a0
 
 
 
 
 #b
 
-def adjHinge(X,y,lamb,kernel_func,stabilizer=1e-5):
-    n = len(y)
-    K = kernel_func(X,X)  # Compute the kernel matrix
+def adjHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
+    n, d = X.shape
+    #print("n = ", n)
+    #print("d = ", d)
+    K = kernel_func(X, X) 
+
     y = np.array(y, dtype=np.double)
+    #print("Shape of y : ", y.shape)
 
-    # Create the P matrix
-    P = np.zeros((n + 1 + n, n + 1 + n))  # α, α_0, ξ
-    P[:n, :n] = K  # Kernel matrix for α terms
-    #P = P * np.outer(y, y)  # Modulate by outer product of labels
-    P += stabilizer * np.eye(n + 1 + n)  # Stabilization
 
-    #1 vector
-    q = np.hstack([np.zeros(n + 1), lamb * np.ones(n)])
+    P = np.zeros((2*n + 1, 2*n+1)) 
+    P[:n, :n] = lamb * K  # Kernel matrix for alpha terms
+    P = matrix(P + stabilizer * np.eye(2*n+1))  # Stabilization
+
+    q = matrix(np.hstack([np.zeros(n + 1),  np.ones(n)]))
     
-    #G matrix
-    G = np.zeros((2 * n, n + 1 + n))
+    # Create G matrix
+    # G1: For the non-negativity constraints of the slack variables 
+    G11 = np.zeros([n,n]) #for 1, its nxd
+    G12 = np.zeros([n,1])
+    G13 = -np.eye(n)
+    G1 = np.hstack([G11,G12,G13])
     
-    G[:n, n+1:] = np.eye(n)  # For ξ ≥ 0
-    G[n:, :n] = -K * y[:, None]  # -Δ(y)K part of the hinge constraint
-    G[n:, n] = -y  # -Δ(y)α_0 part
-    G[n:, n+1:] = np.eye(n)  #slack variables
-    
+    # G2: For the hinge constraints
+    G21 = -y * K
+    G22 = -y * np.ones([n,1])
+    G23 = -np.eye(n)
+    G2 = np.hstack([G21,G22,G23])
+
+    G = np.vstack([G1, G2])  # Stack G1 and G2 to form the full G matrix
+
     # Create the h vector
-    h = np.hstack([np.zeros(n), -np.ones(n)])  # 0s for ξ ≥ 0 and 1s for the hinge constraint
+    h = np.concatenate([np.zeros(n), -np.ones(n)]) 
 
     # Convert 
     P = matrix(P)
     q = matrix(q)
     G = matrix(G)
     h = matrix(h)
-  
 
-    #Solve
-    solvers.options['show_progress'] = False
     solution = solvers.qp(P, q, G, h)
 
-    # Extract solutions
+    # Extract solutions for α and α_0
     alphas = np.array(solution['x'][:n])
     alpha0 = np.array(solution['x'][n])
 
