@@ -188,6 +188,23 @@ def adjHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
     return alphas, alpha0
 
 
+#q2c
+def adjClassify(Xtest, a, a0, X, kernel_func):
+    return np.sign( (kernel_func(Xtest,X)@ a + a0)  )
+
+#q2d
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ##Testing 1b, 2b
