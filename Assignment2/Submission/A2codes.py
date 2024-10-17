@@ -109,16 +109,18 @@ def classify(Xtest, w, w0):
 
 
 #a
+
 def objective_function(params, y, lamb, K):
     n = len(y)
     
     alpha = params[:n]
+    alpha = alpha[:,None]
     alpha0 = params[n]
     
     linear_combination = (K @ alpha) + alpha0
     loss = np.sum(np.logaddexp(0, -y * linear_combination))
     
-    regularization = (lamb / 2) * alpha.T @ K @ alpha
+    regularization = (lamb / 2) * float(alpha.T @ K @ alpha)
     return loss + regularization
 
 
@@ -129,13 +131,10 @@ def adjBinDev(X, y, lamb, kernel_func):
     
     result = minimize(objective_function, initial_params, args=(y, lamb, K))
     
-    a = result.x[:-1]
+    a = result.x[:-1][:,None]
     a0 = result.x[-1]
 
     return a, a0
-
-
-
 
 #b
 
@@ -144,8 +143,7 @@ def adjHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
     #print("n = ", n)
     #print("d = ", d)
     K = kernel_func(X, X) 
-
-    y = np.array(y, dtype=np.double)
+    
     #print("Shape of y : ", y.shape)
 
 
@@ -193,6 +191,8 @@ def adjClassify(Xtest, a, a0, X, kernel_func):
     return np.sign( (kernel_func(Xtest,X)@ a + a0)  )
 
 #q2d
+
+
 
 
 
