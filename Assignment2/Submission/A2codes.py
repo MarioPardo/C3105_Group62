@@ -575,10 +575,15 @@ def cvMnist(dataset_folder, lamb_list, kernel_list, k=5):
     #  compute the average accuracies over k folds
     avg_acc = np.mean(cv_acc, axis=0)
 
+    print(cv_acc)
+
     #unravel/find best lambda and kernel
     best_idx = np.unravel_index(np.argmax(avg_acc), avg_acc.shape)
     best_lamb = lamb_list[best_idx[0]]
     best_kernel = kernel_list[best_idx[1]]
+
+    print("Avg Accuracies: \n", avg_acc)
+    print(f"Best Lambda: {best_lamb}, best kernel: {best_kernel.__name__}" )
     
 
     return best_lamb,best_kernel
@@ -586,12 +591,14 @@ def cvMnist(dataset_folder, lamb_list, kernel_list, k=5):
 
 
 
+dataset_folder = "/Users/mariopardo/OnThisMac/Programming/C3105_Group62/Assignment2/ProjectSpecs"
+gaussK_lambda = lambda X1, X2: gaussKernel(X1, X2, 10.0)
+polyK_lambda = lambda X1, X2: polyKernel(X1, X2, 2.0)
+kernel_list = [linearKernel,gaussK_lambda,polyK_lambda]
+#kernel_list = [linearKernel]
 
-sunExperimentsKernel()
 
-synExperimentsRegularize()
-
-
+print(cvMnist(dataset_folder,[0.01,0.1,1.0,10],kernel_list))
 
 
 
