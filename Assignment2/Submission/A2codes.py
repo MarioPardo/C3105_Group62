@@ -421,6 +421,65 @@ def sunExperimentsKernel():
 
 
 
+#### Q3-----
+#
+
+
+#a
+def dualHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
+
+    n, d = X.shape
+    #print("n = ", n)
+    #print("d = ", d)
+    K = kernel_func(X, X) # needs width arg?
+
+
+    P = np.eye(n) 
+    P = (1/lamb) * (np.eye(n)*y) * K * (np.eye(n)*y) # Kernel matrix for alpha terms
+    P = matrix(P + stabilizer * np.eye(n))  # Stabilization
+
+    q = matrix(-np.ones(n))
+    
+    # Create G matrix
+    G1 = -np.eye(n)
+    G2 = np.eye(n)
+    G = np.vstack([G1, G2])  # Stack G1 and G2 to form the full G matrix
+    
+    h = np.concatenate([np.zeros(n), np.ones(n)]) 
+
+    #Au = b which well use for our perpendicular constraint
+    A = y.T
+    b = 0.
+
+    # Convert 
+    A = matrix(A)
+    b = matrix(b)
+    P = matrix(P)
+    q = matrix(q)
+    G = matrix(G)
+    h = matrix(h)
+
+    solution = solvers.qp(P, q, G, h,A,b)
+    alphas = np.array(solution['x'][:n])
+     
+    i = np.argmin(np.abs(alphas - 0.5))
+    b =  y[i] - ((1/lamb) * K[i].T @ (np.eye(n)*y) @ alphas)
+
+    return alphas, b
+
+
+
+#b
+def dualClassify(Xtest, a, b, X, y, lamb, kernel_func):
+    
+    n = Xtest.shape[0]
+    K= kernel_func(Xtest, X)
+    
+    predictions = (1 / lamb) * K @ np.diag(y.flatten()) @  a + b
+    
+    yhat = np.sign(predictions)
+    
+    return yhat
 
 
 
@@ -434,36 +493,3 @@ def sunExperimentsKernel():
 
 
 
-
-
-##Testing 1b, 2b
-solvers.options['show_progress'] = False
-
-
-X,y = generateData(100,2)
-lamb = 1.0  # Regularization parameter
-
-#linear kernel
-kernel_func = lambda X1, X2: np.dot(X1, X2.T)
-
-#q1a, q1a0 = MarioMinHinge(X,y,lamb)
-q1aDante, q1a0Dante = minHinge(X,y,lamb)
-q2a, q2a0 = adjHinge(X, y, lamb,kernel_func)
-
-print("Optimized weights Q1a Dante:", q1aDante.flatten())
-#print("Opt Weights q1 mario", q1aDante.flatten())
-print("Optimized weights Q2:", q2a.flatten())
-
-print("Optimized bias Q1:", q1a0Dante)
-print("Optimized bias Q2:", q2a0)
-
-#y_pred_mario = classify(X, q1a, q1a0)
-y_pred_dante = classify(X, q1aDante, q1a0Dante)
-
-#q1d
-def compute_accuracy(y_true, y_pred):
-    return np.mean(y_true == y_pred)
-
-#print("MarioMinHinge Accuracy:", compute_accuracy(y, y_pred_mario))
-
-print("minHinge Accuracy:", compute_accuracy(y, y_pred_dante))
