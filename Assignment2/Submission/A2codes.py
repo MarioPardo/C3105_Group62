@@ -1,11 +1,15 @@
 
 #COMP3105 A2 
-#
+#Mario Pardo [101286566]
+#Dante Farinon-Spezzano [101231566]
 
-##Prereq Stuff--------------
+
 from scipy.spatial.distance import cdist
 from matplotlib import pyplot as plt
+import pandas as pd #for opening csv
 
+
+##Prereq Stuff--------------
 
 def linearKernel(X1, X2):
     return X1 @ X2.T
@@ -160,7 +164,8 @@ def plotDigit(x):
     return
 
 
-#-----------
+#--------------------
+
 
 #-----Q1-----
 # a)
@@ -168,6 +173,10 @@ def plotDigit(x):
 import numpy as np
 from scipy.optimize import minimize
 from cvxopt import matrix, solvers
+
+
+
+solvers.options['show_progress'] = False
 
 def obj_loss_function(params,X,y,lamb):
 
@@ -263,6 +272,63 @@ def classify(Xtest, w, w0):
 
 #d
 
+def compute_accuracy(y_true, y_pred):
+    return np.mean(y_true == y_pred)
+
+
+def synExperimentsRegularize():
+
+    n_runs = 100 
+    n_train = 100  
+    n_test = 1000  
+
+    lamb_list = [0.001, 0.01, 0.1, 1.0]  
+    gen_model_list = [1, 2, 3]  
+
+    train_acc_bindev = np.zeros((len(lamb_list), len(gen_model_list), n_runs))
+    test_acc_bindev = np.zeros((len(lamb_list), len(gen_model_list), n_runs))
+    train_acc_hinge = np.zeros((len(lamb_list), len(gen_model_list), n_runs))
+    test_acc_hinge = np.zeros((len(lamb_list), len(gen_model_list), n_runs))
+
+    for r in range(n_runs):
+        for i, lamb in enumerate(lamb_list):
+            for j, gen_model in enumerate(gen_model_list):
+
+                Xtrain, ytrain = generateData(n=n_train, gen_model=gen_model)
+                Xtest, ytest = generateData(n=n_test, gen_model=gen_model)
+
+                
+                # Binary deviance loss (part a)
+                w, w0 = minBinDev(Xtrain, ytrain, lamb)
+                ytrain_pred = classify(Xtrain, w, w0)  
+                ytest_pred = classify(Xtest, w, w0)  
+
+                train_acc_bindev[i, j, r] = compute_accuracy(ytrain, ytrain_pred)
+
+                train_acc_bindev[i, j, r] = compute_accuracy(ytrain, ytrain_pred)
+                test_acc_bindev[i, j, r] = compute_accuracy(ytest, ytest_pred)
+
+                # Hinge loss (part b)
+                w, w0 = minHinge(Xtrain, ytrain, lamb)
+                ytrain_pred = classify(Xtrain, w, w0)  # Predict on training set
+                ytest_pred = classify(Xtest, w, w0)  # Predict on test set
+                # Store accuracies
+                train_acc_hinge[i, j, r] = compute_accuracy(ytrain, ytrain_pred)
+                test_acc_hinge[i, j, r] = compute_accuracy(ytest, ytest_pred)
+
+    # Compute average 
+    avg_train_acc_bindev = np.mean(train_acc_bindev, axis=2)
+    avg_test_acc_bindev = np.mean(test_acc_bindev, axis=2)
+    avg_train_acc_hinge = np.mean(train_acc_hinge, axis=2)
+    avg_test_acc_hinge = np.mean(test_acc_hinge, axis=2)
+
+    # Combine accuracies
+    train_acc = np.hstack([avg_train_acc_bindev, avg_train_acc_hinge])
+    test_acc = np.hstack([avg_test_acc_bindev, avg_test_acc_hinge])
+
+    return train_acc, test_acc
+
+
 
 
 
@@ -274,8 +340,6 @@ def classify(Xtest, w, w0):
 #-----Q2-----------------------
 #
 #
-
-
 
 #a
 
@@ -289,7 +353,7 @@ def objective_function(params, y, lamb, K):
     linear_combination = (K @ alpha) + alpha0
     loss = np.sum(np.logaddexp(0, -y * linear_combination))
     
-    regularization = (lamb / 2) * float(alpha.T @ K @ alpha)
+    regularization = (lamb / 2) * (alpha.T @ K @ alpha).item()
     return loss + regularization
 
 
@@ -309,8 +373,6 @@ def adjBinDev(X, y, lamb, kernel_func):
 
 def adjHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
     n, d = X.shape
-    #print("n = ", n)
-    #print("d = ", d)
     K = kernel_func(X, X) 
     
 
@@ -325,20 +387,14 @@ def adjHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
     # G1: For the non-negativity constraints of the slack variables 
     G11 = np.zeros([n,n]) #for 1, its nxd
     G12 = np.zeros([n,1])
-    print("G12 shape", G12.shape)
     G13 = -np.eye(n)
-    print("G13 shape", G13.shape)
     G1 = np.hstack([G11,G12,G13])
-    print("G1 shape", G1.shape)
     
     # G2: For the hinge constraints
     G21 = -y * K
     G22 = -y * np.ones([n,1])
-    print("G22 shape", G22.shape)
     G23 = -np.eye(n)
-    print("G23 shape", G23.shape)
     G2 = np.hstack([G21,G22,G23])
-    print("G2 shape", G2.shape)
 
     G = np.vstack([G1, G2])  # Stack G1 and G2 to form the full G matrix
 
@@ -374,8 +430,8 @@ def predict(X, alphas, alpha0, kernel, X_support):
 
 def sunExperimentsKernel():
     n_runs = 10 
-    n_train = 10
-    n_test = 100
+    n_train = 100
+    n_test = 1000
     lamb = 0.001
     kernel_list = [linearKernel,
                    lambda X1, X2: polyKernel(X1, X2, 2),
@@ -421,6 +477,8 @@ def sunExperimentsKernel():
 
 
 
+
+
 #### Q3-----
 #
 
@@ -429,8 +487,6 @@ def sunExperimentsKernel():
 def dualHinge(X, y, lamb, kernel_func, stabilizer=1e-5):
 
     n, d = X.shape
-    #print("n = ", n)
-    #print("d = ", d)
     K = kernel_func(X, X) # needs width arg?
 
 
@@ -483,11 +539,57 @@ def dualClassify(Xtest, a, b, X, y, lamb, kernel_func):
 
 
 
+#c
+def compute_accuracy(y_true, y_pred):
+    return np.mean(y_true == y_pred)
+
+def split_arr(arr,n, k):
+    return np.array_split(arr, k)  # Split into k groups
+
+
+def cvMnist(dataset_folder, lamb_list, kernel_list, k=5):
+
+    train_data = pd.read_csv(f"{dataset_folder}/A2train.csv", header=None).to_numpy()
+
+    X = train_data[:, 1:] #/ 255.
+    y = train_data[:, 0][:, None]
+    y[y == 4] = -1
+    y[y == 9] = 1
+
+    cv_acc = np.zeros([k, len(lamb_list), len(kernel_list)]) 
+
+    split_data = split_arr(X,X.shape[0],k)
+    split_labels = split_arr(y,y.shape[0],k)
+
+    for i, lamb in enumerate(lamb_list):
+        for j, kernel_func in enumerate(kernel_list):
+            for l in range(k):
+                Xtrain =  np.concatenate([split_data[m] for m in range(k) if m != l], axis=0)
+                ytrain = np.concatenate([split_labels[m] for m in range(k) if m != l], axis=0)
+                Xval = split_data[l]
+                yval = split_labels[l]
+                a, b = dualHinge(Xtrain, ytrain, lamb, kernel_func   )
+                yhat = dualClassify(Xval, a, b, Xtrain, ytrain, lamb, kernel_func) 
+                cv_acc[l, i, j] = compute_accuracy(yval, yhat)
+    
+    #  compute the average accuracies over k folds
+    avg_acc = np.mean(cv_acc, axis=0)
+
+    #unravel/find best lambda and kernel
+    best_idx = np.unravel_index(np.argmax(avg_acc), avg_acc.shape)
+    best_lamb = lamb_list[best_idx[0]]
+    best_kernel = kernel_list[best_idx[1]]
+    
+
+    return best_lamb,best_kernel
 
 
 
 
 
+sunExperimentsKernel()
+
+synExperimentsRegularize()
 
 
 
