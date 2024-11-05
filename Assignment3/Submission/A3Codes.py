@@ -42,20 +42,24 @@ def minMulDev(X, Y):
 
 def classify(X,W):
     WX = np.dot(X,W)
-    print("WX",WX)
+    #print("WX",WX)
     indmax = np.argmax(WX, axis=1)
-    print("indmax",indmax)
+    #print("indmax",indmax)
 
     result = convertToOneHot(indmax, WX.shape[1])
-    print("result",result)
+    #print("result",result)
 
     return result
 
 #Q1c
 
 def calculateAcc(Yhat, Y):
-    print("Prediction", Yhat)
-    print("Actual", Y)
+    #print("Prediction", Yhat)
+    #print("Actual", Y)
     return np.mean(Yhat == Y)
+
+
+
+
 
 ##
