@@ -4,10 +4,6 @@ from scipy.special import logsumexp
 
 ##Q1
 
-import numpy as np
-from scipy.optimize import minimize
-from scipy.special import logsumexp
-
 #Q1a
 
 def multinomial_deviance_loss(W, X, Y, d, k):
@@ -42,12 +38,9 @@ def minMulDev(X, Y):
 
 def classify(X,W):
     WX = np.dot(X,W)
-    #print("WX",WX)
     indmax = np.argmax(WX, axis=1)
-    #print("indmax",indmax)
 
     result = convertToOneHot(indmax, WX.shape[1])
-    #print("result",result)
 
     return result
 
