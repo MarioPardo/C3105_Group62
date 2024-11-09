@@ -24,7 +24,7 @@ def multinomial_deviance_loss(W, X, Y, d, k):
     WX = np.dot(X, W)
 
     log_sum_exp = logsumexp(WX, axis=1)
-    y_WX = np.sum(Y * WX, axis=1)
+    y_WX = np.sum(WX*Y, axis=1)
     
     loss = np.mean(log_sum_exp - y_WX)
     
@@ -58,7 +58,7 @@ def classify(X,W):
 #Q1c
 
 def calculateAcc(Yhat, Y):
-    return np.mean(Yhat == Y)
+    return np.mean(np.all(Yhat == Y,axis=1))
 
 ##
 

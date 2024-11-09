@@ -47,9 +47,7 @@ def classify(X,W):
 #Q1c
 
 def calculateAcc(Yhat, Y):
-    #print("Prediction", Yhat)
-    #print("Actual", Y)
-    return np.mean(Yhat == Y)
+    return np.mean(np.all(Yhat == Y,axis=1))
 
 
 
