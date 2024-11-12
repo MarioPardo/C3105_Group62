@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 #import YourName.A3codes as A3codes
 from A3helpers import augmentX, plotModel, generateData, plotPoints, convertToOneHot
-
+from scipy.spatial.distance import cdist
 
 ##Q1
 
@@ -60,6 +60,49 @@ def classify(X,W):
 def calculateAcc(Yhat, Y):
     return np.mean(np.all(Yhat == Y,axis=1))
 
+
+
+
+#Q2
+
+
+
+
+
+
+#Q3
+
+
+#a
+
+def kmeans(X,k,max_iter=1000):
+    if(max_iter <= 0):
+        return False
+     
+    n,d = X.shape
+    U = X[np.random.choice(n,k,replace=False)]
+
+    for i in range(max_iter):
+
+        D = cdist(X, U, 'euclidean')
+        Y = np.argmin(D, axis=1)
+
+        old_U = U
+        Y = convertToOneHot(Y, k)
+        YtY = Y.T @ Y + 1e-8 * np.eye(k) #for stability
+        U = np.linalg.inv(Y.T @ Y) @ Y.T @ X
+
+        if np.allclose(U, old_U):
+            break
+
+        
+    obj_val = 1/(2*n) * np.linalg.norm(X - Y @ U, 'fro')**2
+
+    return Y, U, obj_val
+
+
+
+
 ##
 
 
@@ -98,4 +141,4 @@ def _plotKmeans():
 if __name__ == "__main__":
 
 	_plotCls()
-	#_plotKmeans()
+	_plotKmeans()
