@@ -111,7 +111,7 @@ def _plotCls():
 	n = 100
 
 	# Generate data
-	Xtrain, Ytrain = generateData(n=n, gen_model=1, rand_seed=0)
+	Xtrain, Ytrain = generateData(n=n, gen_model=2, rand_seed=0)
 	Xtrain = augmentX(Xtrain)
 
 	# Learn and plot results
