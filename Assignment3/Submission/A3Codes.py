@@ -248,7 +248,29 @@ def PCA(X, k):
 
     return U
 
+#q2b
 
+#2b
+
+# Load the data
+data = np.loadtxt('/Users/dantefarinon-spezzano/Downloads/A3files/A3train.csv', delimiter=',')
+mean_vector = np.mean(data, axis=0)
+data_centered = data - mean_vector
+
+# Apply PCA with k=20
+k = 20
+U = PCA(data_centered, k)
+
+#helper function given
+def plotImgs(X):
+    fig = plt.figure(figsize=(16, 6))
+    for i in range(20):
+        ax = fig.add_subplot(3, 10, i + 1, xticks=[], yticks=[])
+        ax.imshow(X[i].reshape((28, 28)), cmap='gray')
+    plt.show()
+    return
+
+plotImgs(U)
 
 #Q2c
 
@@ -358,7 +380,25 @@ def repeatKmeans(X,k,n_runs=100):
 #Q3c
 
 
+def chooseK(X, k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]):
+   
+    obj_val_list = []
+    
+    for k in k_candidates:
+        # Call repeatKmeans with X and k, and retrieve only the best objective value
+        _, _, obj_val = repeatKmeans(X, k)
+        obj_val_list.append(obj_val)
+    
+    return obj_val_list
 
+Xtrain, Ytrain = generateData(n=100, gen_model=2)
+obj_val_list = chooseK(Xtrain)
+
+k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
+
+print("Objective values for different k:")
+print("k:", k_candidates)
+print("Objective values:", obj_val_list)
 
 
 
@@ -396,5 +436,14 @@ def _plotKmeans2():
 
 _plotKmeans()
 _plotKmeans2()
+
+Xtrain, Ytrain = generateData(n=100, gen_model=2)
+obj_val_list = chooseK(Xtrain)
+
+k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
+
+print("Objective values for different k:")
+print("k:", k_candidates)
+print("Objective values:", obj_val_list)
 
 
