@@ -250,10 +250,10 @@ def PCA(X, k):
 
 #q2b
 
-#2b
-
-# Load the data
-data = np.loadtxt('/Users/dantefarinon-spezzano/Downloads/A3files/A3train.csv', delimiter=',')
+#2b Code for running commented out
+'''
+#data = np.loadtxt('/Users/dantefarinon-spezzano/Downloads/A3files/A3train.csv', delimiter=',')
+data = np.loadtxt("/Users/mariopardo/OnThisMac/Programming/C3105_Group62/Assignment3/ProjectSpecs/A3files/A3train.csv", delimiter=',')
 mean_vector = np.mean(data, axis=0)
 data_centered = data - mean_vector
 
@@ -271,6 +271,7 @@ def plotImgs(X):
     return
 
 plotImgs(U)
+'''
 
 #Q2c
 
@@ -417,6 +418,16 @@ print("----")
 
 #Testing Q2
 
+Xtrain, Ytrain = generateData(n=100, gen_model=2)
+obj_val_list = chooseK(Xtrain)
+
+k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
+
+print("Objective values for different k:")
+print("k:", k_candidates)
+print("Objective values:", obj_val_list)
+
+
 
 #Testing Q3
 
@@ -437,13 +448,5 @@ def _plotKmeans2():
 _plotKmeans()
 _plotKmeans2()
 
-Xtrain, Ytrain = generateData(n=100, gen_model=2)
-obj_val_list = chooseK(Xtrain)
-
-k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
-
-print("Objective values for different k:")
-print("k:", k_candidates)
-print("Objective values:", obj_val_list)
 
 
