@@ -168,10 +168,7 @@ def _plotKmeans():
 
 	return
 
-
-
-
-##
+#################################################################################################
 
 ##Q1
 
@@ -230,8 +227,7 @@ def PCA(X, k):
     mu = np.mean(X, axis=0)
     X_adjust = X - mu
 
-    #compute covariacne matrix
-    #cv_matrix = np.dot(X_adjust.T,X_adjust)
+    #compute covariance matrix
     cv_matrix = X_adjust.T @ X_adjust
 
     eigenvalues, eigenvectors = eigh(cv_matrix)
@@ -304,29 +300,29 @@ def synClsExperimentsPCA():
                 Xtest, Ytest = generateData(n=n_test, gen_model=gen_model)      
 
                 # Perform PCA on the training data
-                U = PCA(Xtrain, k)  # PCA function should return the top k eigenvectors # done
-
+                U = PCA(Xtrain, k)  # PCA function should return the top k eigenvectors
+ 
                 # Project the training and test data
-                mu = np.mean(Xtrain, axis=0)  # Calculate mean vector for training data # done
-                Xtrain_proj = projPCA(Xtrain, mu, U)  # Call projPCA to get the new features # done
-                Xtest_proj = projPCA(Xtest, mu, U)    # Call projPCA to get the new features # done
+                mu = np.mean(Xtrain, axis=0)  # Calculate mean vector for training data
+                Xtrain_proj = projPCA(Xtrain, mu, U)  # Call projPCA to get the new features 
+                Xtest_proj = projPCA(Xtest, mu, U)    # Call projPCA to get the new features 
 
                 # Data augmentation (if applicable)
-                Xtrain_proj = augmentX(Xtrain_proj)   # Assuming augmentX modifies the data # done
+                Xtrain_proj = augmentX(Xtrain_proj)   # Assuming augmentX modifies the data 
                 Xtest_proj = augmentX(Xtest_proj)     # done
 
                 # Train the model on projected and augmented training data
-                W = minMulDev(Xtrain_proj, Ytrain)    # This trains the model # done
+                W = minMulDev(Xtrain_proj, Ytrain)    # This trains the model
 
                 # Calculate training accuracy
                 Yhat_train = classify(Xtrain_proj, W) # done
-                train_acc[i, j, r] = calculateAcc(Yhat_train, Ytrain)  # done
+                train_acc[i, j, r] = calculateAcc(Yhat_train, Ytrain) 
 
                 # Calculate test accuracy
                 Yhat_test = classify(Xtest_proj, W)  # done
-                test_acc[i, j, r] = calculateAcc(Yhat_test, Ytest)  # done
+                test_acc[i, j, r] = calculateAcc(Yhat_test, Ytest) 
 
-    # TODO: Compute the average accuracies over the runs
+
     avg_train_acc = np.mean(train_acc, axis=2)  
     avg_test_acc = np.mean(test_acc, axis=2)   
 
@@ -397,56 +393,11 @@ obj_val_list = chooseK(Xtrain)
 
 k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
 
-print("Objective values for different k:")
-print("k:", k_candidates)
-print("Objective values:", obj_val_list)
+#print("Objective values for different k:")
+#print("k:", k_candidates)
+#print("Objective values:", obj_val_list)
 
 
-
-###Code for testing submission
-
-
-#Testing Q1
-
-print("Testing Q1---")
-
-train_acc, test_acc = synClsExperiments(minMulDev, classify, calculateAcc)
-print("TrainingACC", train_acc)
-print("TestingACC", test_acc)
-print("----")
-
-
-#Testing Q2
-
-Xtrain, Ytrain = generateData(n=100, gen_model=2)
-obj_val_list = chooseK(Xtrain)
-
-k_candidates=[2, 3, 4, 5, 6, 7, 8, 9]
-
-print("Objective values for different k:")
-print("k:", k_candidates)
-print("Objective values:", obj_val_list)
-
-
-
-#Testing Q3
-
-def _plotKmeans2():
-
-	n = 300
-	k = 5
-
-	Xtrain, _ = generateData(n, gen_model=2)
-
-	Y, U, obj_val = repeatKmeans(Xtrain, k)
-	plotPoints(Xtrain, Y)
-	plt.legend()
-	plt.show()
-
-	return
-
-_plotKmeans()
-_plotKmeans2()
 
 
 
