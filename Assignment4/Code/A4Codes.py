@@ -1,10 +1,12 @@
 #COMP3105 A4
 #Mario Pardo 101286566
+#Dante Farinon-Spezzano-101231566
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, Lambda, Multiply, Add, Subtract, Dropout, Reshape
 from tensorflow.keras.models import Model, Sequential
 import numpy as np
+import pandas as pd  #added for importing data when testing
 
 
 
@@ -81,26 +83,3 @@ def classify(Xtest, model):
     return y_pred
 
 
-
-'''
-#Code that loads the data and trains the model
-#load the data from  /Assignment4/Data/A4train.csv
-# Load the data
-data = pd.read_csv('/Users/mariopardo/OnThisMac/Programming/C3105_Group62/Assignment4/Data/A4train.csv')
-ytrain = data.iloc[:, 0].values
-Xtrain = data.iloc[:, 1:].values
-
-
-# Train the model
-model = learn(Xtrain, ytrain)
-
-# Load validation data
-val_data = pd.read_csv('/Users/mariopardo/OnThisMac/Programming/C3105_Group62/Assignment4/Data/A4val.csv')
-X_val = val_data.iloc[:, 1:].values
-y_val = val_data.iloc[:, 0].values
-
-# Classify and print accuracy
-y_pred = classify(X_val, model)
-accuracy = np.mean(y_pred == y_val)
-print(f'Validation accuracy: {accuracy}')
-'''
