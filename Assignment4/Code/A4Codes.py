@@ -4,27 +4,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, Lambda, Multiply, Add, Subtract, Dropout, Reshape
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.regularizers import l2
-from tensorflow.keras.callbacks import LearningRateScheduler
-
-
 import numpy as np
-import pandas as pd
-
-
-###
-import matplotlib.pyplot as plt
-
-def plotImg(x):
-    img = x.reshape((84, 28))
-    plt.imshow(img, cmap='gray')
-    plt.show()
-    return
-
-
-
-
-###
 
 
 
@@ -101,6 +81,8 @@ def classify(Xtest, model):
     return y_pred
 
 
+
+'''
 #Code that loads the data and trains the model
 #load the data from  /Assignment4/Data/A4train.csv
 # Load the data
@@ -121,4 +103,4 @@ y_val = val_data.iloc[:, 0].values
 y_pred = classify(X_val, model)
 accuracy = np.mean(y_pred == y_val)
 print(f'Validation accuracy: {accuracy}')
-
+'''
